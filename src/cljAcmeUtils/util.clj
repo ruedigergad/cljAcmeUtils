@@ -193,3 +193,11 @@
 
 
 
+(defn print-err [s]
+  (binding [*out* *err*]
+    (print s)))
+
+(defn print-err-ln [s]
+  (binding [*out* *err*]
+    (println s)))
+
