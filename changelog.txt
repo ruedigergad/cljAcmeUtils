@@ -1,0 +1,5 @@
+master
+
+1.7.0
+  - Add convenience functions for printing to stderr.
+
