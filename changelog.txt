@@ -1,5 +1,8 @@
 master
 
+1.7.1
+  - Fix stderr print functions to accept variable lenght arguments.
+
 1.7.0
   - Add convenience functions for printing to stderr.
 
