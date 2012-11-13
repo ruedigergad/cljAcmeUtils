@@ -1,5 +1,8 @@
 # cljAcmeUtils
 
+cljAcmeUtils is now continued as clj-assorted-utils: https://github.com/ruedigergad/clj-assorted-utils
+clj-assorted-utils is now also available from clojars.org: https://clojars.org/clj-assorted-utils
+
 Unsorted bunch of helper and utility functions.
 
 ## Usage

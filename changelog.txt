@@ -1,4 +1,6 @@
 master
+
+1.8.0
   - Add scheduler.
 
 1.7.1
