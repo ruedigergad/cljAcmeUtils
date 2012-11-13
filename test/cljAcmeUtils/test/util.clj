@@ -168,3 +168,18 @@
         expected-map {"tag" "foo" "attrs" {"fubar" "snafu"} "content" ["bar"]}]
     (is (= expected-map (xml-string-to-map-stringified xml-str)))))
 
+
+
+;;;
+;;; Tests for running fn's regularly
+;;;
+(deftest test-simple-scheduler
+  (let [flag (prepare-flag)
+        run-fn #(set-flag flag)
+        sched (scheduler)]
+    (sched :once run-fn 100)
+    (sleep 300)
+    (is (flag-set? flag))))
+
+
+

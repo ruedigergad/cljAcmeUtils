@@ -1,4 +1,5 @@
 master
+  - Add scheduler.
 
 1.7.1
   - Fix stderr print functions to accept variable lenght arguments.

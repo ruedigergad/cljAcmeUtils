@@ -13,7 +13,8 @@
   (:use clojure.java.io)
   (:use clojure.walk)
   (:use clojure.xml)
-  (:require (clojure [string :as str])))
+  (:require (clojure [string :as str]))
+  (:import (java.util.concurrent Executors TimeUnit)))
 
 
 (defn sleep [ms]
@@ -96,7 +97,7 @@
 
 
 ;;;
-;;; Delayed evaluation
+;;; Delayed and repeated evaluation.
 ;;;
 (defmacro delay-eval [d & body]
   "Evaluates the supplied body with the given delay 'd' ([ms])."
@@ -105,6 +106,23 @@
               (Thread/sleep ~d)
               ~@body))
      (.start)))
+
+(defn scheduler []
+  "Create an executor for executing fns in an own thread."
+  (let [executor (Executors/newSingleThreadScheduledExecutor)]
+    (fn
+      ([k]
+       (cond
+         (= k :stop) (.shutdown executor)
+         (= k :stop-now) (.shutdownNow executor)))
+      ([k f d]
+       (cond
+         (= k :once) (.schedule executor f d TimeUnit/MILLISECONDS)
+         (= k :repeat) (.scheduleAtFixedRate executor f 0 d TimeUnit/MILLISECONDS)))
+      ([k f id d]
+       (cond
+         (= k :repeat) (.scheduleAtFixedRate executor f id d TimeUnit/MILLISECONDS))))))
+
 
 
 ;;;
