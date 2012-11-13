@@ -14,7 +14,9 @@
         cljAcmeUtils.util))
 
 
-
+;;;
+;;; Tests for executing commands.
+;;;
 (deftest test-exec-with-out
   (let [command "ls /etc/passwd"
         stdout-run (prepare-flag)
@@ -33,6 +35,9 @@
 
 
 
+;;;
+;;; Tests for handling files and directories.
+;;;
 (def test-dirname "test-dir-foo")
 (def test-filename "test-file-bar")
 
@@ -76,13 +81,9 @@
 
 
 
-(deftest get-classname
-  (let [o (Object.)
-        n (classname o)]
-    (is (= "Object" n))))
-
-
-
+;;;
+;;; Tests for setting and querying flags and a simple counter.
+;;;
 (deftest flag-not-set
   (let [flag (prepare-flag)]
     (is (not (flag-set? flag)))))
@@ -92,13 +93,20 @@
     (set-flag flag)
     (is (flag-set? flag))))
 
-
-
 (deftest counter-test
   (let [my-counter (prepare-counter)]
     (dotimes [_ 1000] (inc-counter my-counter))
     (is (= 1000 @my-counter))))
 
+
+
+;;;
+;;; Tests for getting class and fn names.
+;;;
+(deftest get-classname
+  (let [o (Object.)
+        n (classname o)]
+    (is (= "Object" n))))
 
 (defn test-fn [] (println "It's -O3 the letter not -03 the number."))
 
@@ -106,7 +114,9 @@
   (is (= "test-fn" (fn-name test-fn))))
 
 
-
+;;;
+;;; Tests for manipulating vectors.
+;;;
 (deftest test-byte-seq-to-int
   (let [byte-vec [82 17 0 0]
         int-val 4434]
@@ -135,6 +145,11 @@
     (is (= expected-vec changed-vec))))
 
 
+
+;;;
+;;; Tests for messing with XML.
+;;; Primarily for transforming XML data in string format to maps.
+;;;
 (deftest test-xml-string-to-map
   (let [xml-str "<foo fubar=\"snafu\">bar</foo>"
         expected-map {:tag :foo :attrs {:fubar "snafu"} :content ["bar"]}]

@@ -34,9 +34,11 @@
     (.start stdout-thread)))
 
 
-
-; Helper functions for handling system properties.
+;;;
+;;; Helper functions for handling system properties.
+;;;
 (defn get-system-property [p]
+  "Get system property p. p is a String naming the property go get."
   (System/getProperty p))
 (def get-arch (partial get-system-property "os.arch"))
 (def get-os (partial get-system-property "os.name"))
@@ -46,47 +48,56 @@
 
 
 
-; Helper functions for handling files and directories accepting names as 
-; Strings or URI (Essentially everything clojure.java.io/file can handle.).
-; Well actually these had only been tested using Strings... o_X
+;;;
+;;; Helper functions for handling files and directories accepting names as 
+;;; Strings or URI (Essentially everything clojure.java.io/file can handle.).
+;;; Well actually these had only been tested using Strings... o_X
+;;;
 (defn exists? [f]
+  "Returns true if f exists in the filesystem."
   (.exists (file f)))
 
 (defn is-file? [f]
+  "Returns true if f is a file."
   (.isFile (file f)))
 
 (defn file-exists? [f]
+  "Returns true if f exists and is a file."
   (and 
     (exists? f)
     (is-file? f)))
 
 (defn is-dir? [d]
+  "Returns true if f is a directory."
   (.isDirectory (file d)))
 
 (defn dir-exists? [d]
+  "Returns true if f exists and is a directory."
   (and
     (exists? d)
     (is-dir? d)))
 
 (defn mkdir [d]
+  "Create directory d and if required all parent directories.
+   This is equivalent to 'mkdir -p d' on Linux systems."
   (.mkdirs (file d)))
 
 (defn rm [f]
+  "Delete file f."
   (delete-file (file f)))
 
 (defn rmdir [d]
+  "Delete d if d is an empty directory."
   (if (is-dir? d) (rm d)))
 
 (defn touch [f]
+  "If f does not exist, create it."
   (.createNewFile (file f)))
 
 
-
-(defn classname [o]
-  "Get classname without leading package names of the given object o."
-  (-> (type o) (str) (str/split #"\.") (last)))
-
-
+;;;
+;;; Delayed evaluation
+;;;
 (defmacro delay-eval [d & body]
   "Evaluates the supplied body with the given delay 'd' ([ms])."
   `(doto (Thread. 
@@ -97,27 +108,43 @@
      (.start)))
 
 
-
+;;;
+;;; Flags and a simple counter.
+;;; I use these primarily for unit testing to check if something happened or not.
+;;;
 (defn prepare-flag []
+  "Prepare a flag with default value false."
   (ref {:flag false}))
 
 (defn set-flag [f]
+  "Set flag to true."
   (dosync
     (alter f assoc :flag true)))
 
 (defn flag-set? [f]
+  "Test if flag had been set."
   (:flag @f))
 
-
-
 (defn prepare-counter []
+  "Prepare a simple counter. Use @ to access the value."
   (ref 0))
 
 (defn inc-counter [c]
+  "Increment the given counter c."
   (dosync (alter c inc)))
 
 
+
+;;;
+;;; Convenience functions for getting class and fn names.
+;;;
+(defn classname [o]
+  "Get classname without leading package names of the given object o."
+  (-> (type o) (str) (str/split #"\.") (last)))
+
+
 (defn fn-name [f]
+  "Get the name of the given fn f."
   (-> 
     (.getClass f) 
     (.getName) 
@@ -127,7 +154,11 @@
 
 
 
+;;;
+;;; Byte to Int
+;;;
 (defn byte-seq-to-int [byte-seq]
+  "Convert the byte sequence byte-seq to an integer."
   (loop [s byte-seq acc 0 shift 0]
     (if (empty? s)
       acc
@@ -138,11 +169,19 @@
                   (* 8 shift))) 
              (inc shift)))))
 
+
+
+;;;
+;;; Functions for messing with byte vectors.
+;;;
 (defn get-int-from-byte-vector [v n] 
+  "From given vector of bytes v get the integer starting at offset n.
+   Starting at offset n the next 4 bytes will be converted to an integer."
   (byte-seq-to-int 
     (subvec v n (+ n 4))))
 
 (defn int-to-byte-vector [val]
+  "Convert the given integer val to a vector of 4 bytes."
   (loop [acc [] shift 0] 
     (if (= 8 shift)
       acc
@@ -151,18 +190,24 @@
         (inc shift)))))
 
 (defn vec-replace [v n delta]
+  "In given vector v replace the content of v starting at index n with delta."
   (loop [i 0 acc v]
     (if (= i (count delta))
       acc
       (recur (inc i) (assoc acc (+ n i) (delta i))))))
 
 (defn change-int-in-byte-vector [v n f]
+  "In the given vector v, change the byte representation of an integer by applying function f."
   (let [int-val (get-int-from-byte-vector v n)
         new-int (f int-val)
         byte-vec (subvec (int-to-byte-vector new-int) 0 4)]
     (vec-replace v n byte-vec)))
 
 
+
+;;;
+;;; Functions for messing with XML data.
+;;;
 (defn xml-string-to-map [xml-str]
   "Takes an XML definition in form of a string and outputs the corresponding map."
   (with-open [xml-in (clojure.java.io/input-stream 
@@ -188,16 +233,21 @@
   (clojure.walk/postwalk walk-fn m)))
 
 (defn xml-string-to-map-stringified [xml-str]
+  "Convert the XML string xml-str to a map with all keywords converted to strings."
   (let [xml-map (xml-string-to-map xml-str)]
     (stringify-map xml-map)))
 
 
-
+;;;
+;;; Print to stderr.
+;;;
 (defn print-err [& s]
+  "print to stderr."
   (binding [*out* *err*]
     (apply print s)))
 
 (defn print-err-ln [& s]
+  "println to stderr."
   (binding [*out* *err*]
     (apply println s)))
 
