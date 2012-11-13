@@ -101,10 +101,9 @@
 (defmacro delay-eval [d & body]
   "Evaluates the supplied body with the given delay 'd' ([ms])."
   `(doto (Thread. 
-           (fn [] 
-             (do 
-               (Thread/sleep ~d) 
-               ~@body))) 
+           #(do
+              (Thread/sleep ~d)
+              ~@body))
      (.start)))
 
 
