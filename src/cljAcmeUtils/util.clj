@@ -107,21 +107,38 @@
               ~@body))
      (.start)))
 
-(defn scheduler []
+(defn executor []
   "Create an executor for executing fns in an own thread."
-  (let [executor (Executors/newSingleThreadScheduledExecutor)]
-    (fn
-      ([k]
-       (cond
-         (= k :stop) (.shutdown executor)
-         (= k :stop-now) (.shutdownNow executor)))
-      ([k f d]
-       (cond
-         (= k :once) (.schedule executor f d TimeUnit/MILLISECONDS)
-         (= k :repeat) (.scheduleAtFixedRate executor f 0 d TimeUnit/MILLISECONDS)))
-      ([k f id d]
-       (cond
-         (= k :repeat) (.scheduleAtFixedRate executor f id d TimeUnit/MILLISECONDS))))))
+  (Executors/newSingleThreadScheduledExecutor))
+
+(defn shutdown [exec]
+  "Shut executor down."
+  (.shutdown exec))
+
+(defn shutdown-now [exec]
+  "Force executor shut down."
+  (.shutdownNow exec))
+
+(defn run-once
+  "Run f using executor exec once with delay d.
+   Optionally a time unit tu can be given.
+   tu defaults to TimeUnit/MILLISECONDS."
+  ([exec f d]
+   (run-once exec f d TimeUnit/MILLISECONDS))
+  ([exec f d tu]
+   (.schedule exec f d tu)))
+
+(defn run-repeat
+  "Run f repeatedly using executor exec with delay d.
+   Optionally an initial delay id and a time unit tu can be given.
+   Time unit is a static member of TimeUnit, e.g., TimeUnit/SECONDS 
+   and defaults to TimeUnit/MILLISECONDS."
+  ([exec f d]
+   (run-repeat exec f 0 d))
+  ([exec f id d]
+   (run-repeat exec f id d TimeUnit/MILLISECONDS))
+  ([exec f id d tu]
+   (.scheduleAtFixedRate exec f id d tu)))
 
 
 

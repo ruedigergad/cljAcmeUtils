@@ -173,11 +173,11 @@
 ;;;
 ;;; Tests for running fn's regularly
 ;;;
-(deftest test-simple-scheduler
+(deftest test-simple-executor
   (let [flag (prepare-flag)
         run-fn #(set-flag flag)
-        sched (scheduler)]
-    (sched :once run-fn 100)
+        exec (executor)]
+    (run-once exec run-fn 100)
     (sleep 300)
     (is (flag-set? flag))))
 
